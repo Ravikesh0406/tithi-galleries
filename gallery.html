@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#6366f1" />
+  <title>Gallery — Tithi Galleries</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/app.js"></script>
+</head>
+<body>
+  <div class="gallery-page" id="gallery-root">
+    <div class="gp-header">
+      <a href="index.html" class="text-link" style="margin-bottom:12px;display:inline-block">← Tithi Galleries</a>
+      <h1 id="gallery-title">Gallery</h1>
+      <p class="gp-sub" id="gallery-date"></p>
+      <p class="gp-sub"><span id="gallery-count">0 photos</span> · <span style="color:#16a34a;font-weight:600">Live updates on</span></p>
+    </div>
+    <div class="search-row">
+      <input class="search-input" id="search-input" type="text" placeholder="Search photos — try 'cake', 'group', 'dance'" />
+      <button class="search-btn" id="search-btn" type="button" onclick="document.getElementById('search-input').focus()">Search</button>
+    </div>
+    <div id="gallery-grid"><p class="gallery-empty">Loading photos…</p></div>
+    <div id="qr-section" class="qr-section">
+      <h3>Share this gallery</h3>
+      <p class="muted">Guests can scan the QR code or open the link on any phone.</p>
+      <img id="qr-img" alt="QR code" width="220" />
+      <div class="share-links">
+        <button class="btn btn-ghost" id="copy-link" type="button">Copy gallery link</button>
+        <a class="btn btn-primary" id="wa-link" href="#" target="_blank" rel="noopener">Share on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

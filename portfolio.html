@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio — Tithi Galleries</title>
+  <meta name="description" content="Photographer portfolio page on Tithi Galleries — showcase your best work, stats and contact details." />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/app.js"></script>
+</head>
+<body>
+  <header class="navbar">
+    <a class="brand" href="index.html">🌀 Tithi Galleries</a>
+    <nav>
+      <a href="index.html#features">Features</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="store.html">Store</a>
+      <a class="btn btn-ghost" href="dashboard.html">Dashboard</a>
+    </nav>
+  </header>
+
+  <main id="portfolio-root">
+    <section class="hero" style="padding-bottom:10px">
+      <div class="container" style="text-align:center;max-width:820px">
+        <div class="eyebrow">PORTFOLIO</div>
+        <h1 id="pf-studio">Loading…</h1>
+        <p class="sub" id="pf-tagline"></p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#contact">Book this photographer</a>
+          <a class="btn btn-ghost" href="gallery.html?id=demo-wedding-2026">View sample gallery</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:10px">
+      <div class="container">
+        <div class="pf-cover" id="pf-cover"></div>
+        <div class="score-board pf-stats" id="pf-stats"></div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container feature-row">
+        <div class="feature-text">
+          <div class="eyebrow">ABOUT</div>
+          <h2 id="pf-city"></h2>
+          <p id="pf-about"></p>
+          <p class="feature-note">Available for weddings, receptions, mehendi, sangeet and destination events.</p>
+        </div>
+        <div class="feature-img">
+          <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=900&q=80" alt="Photographer at work" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="eyebrow">SELECTED WORK</div>
+        <h2>Featured galleries</h2>
+        <div class="pf-grid" id="pf-galleries"></div>
+      </div>
+    </section>
+
+    <section class="section" id="contact" style="padding-top:0">
+      <div class="container" style="max-width:680px">
+        <div class="eyebrow">CONTACT</div>
+        <h2>Let's talk about your date</h2>
+        <form id="contact-form" class="form-card">
+          <label>Your name<input required name="name" placeholder="Ananya Sharma" /></label>
+          <label>Phone / WhatsApp<input required name="phone" placeholder="+91 98765 43210" /></label>
+          <label>Event date<input type="date" name="date" /></label>
+          <label>Tell us about the event<textarea name="msg" rows="3" placeholder="Wedding in Jaipur, 300 guests, 2 days…"></textarea></label>
+          <button class="btn btn-primary" type="submit">Send enquiry</button>
+          <p class="form-msg" id="contact-msg" hidden></p>
+        </form>
+        <div class="pf-contact-bar" id="pf-contact"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div><b>🌀 Tithi Galleries</b><br />AI photo galleries for Indian event photographers.</div>
+      <div><b>Product</b><br /><a href="index.html#features">Features</a><br /><a href="pricing.html">Pricing</a><br /><a href="store.html">Store</a></div>
+      <div><b>Company</b><br /><a href="portfolio.html">Portfolio</a><br /><a href="blog.html">Blog</a><br /><a href="support.html">Support</a></div>
+      <div><b>Contact</b><br />+91 90000 00000<br />hello@tithi.example<br />Made in India 🇮🇳</div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const [pfRes, gRes] = await Promise.all([
+          fetch('/api/portfolio'),
+          fetch('/api/galleries')
+        ]);
+        const pf = await pfRes.json();
+        const galleries = await gRes.json();
+
+        document.getElementById('pf-studio').textContent = pf.studioName || 'Photographer';
+        document.getElementById('pf-tagline').textContent = pf.tagline || '';
+        document.getElementById('pf-city').textContent = pf.city || '';
+        document.getElementById('pf-about').textContent = pf.about || '';
+        document.getElementById('pf-cover').style.backgroundImage = `url('${pf.cover || ''}')`;
+        document.getElementById('pf-stats').innerHTML = (pf.stats || []).map(s =>
+          `<div class="score"><b>${s.value}</b><span>${s.label}</span></div>`
+        ).join('');
+        document.getElementById('pf-contact').innerHTML =
+          `<span>📞 <a href="tel:${(pf.phone || '').replace(/\s/g, '')}">${pf.phone || ''}</a></span>
+           <span>✉️ <a href="mailto:${pf.email || ''}">${pf.email || ''}</a></span>`;
+
+        const shown = galleries.filter(g => !g.isDemo).slice(0, 6);
+        const list = shown.length ? shown : galleries.slice(0, 3);
+        document.getElementById('pf-galleries').innerHTML = list.map(g => {
+          const cover = (g.photos && g.photos[0] && g.photos[0].src) || 'https://picsum.photos/seed/' + g.id + '/600/400';
+          const count = (g.photos || []).length;
+          return `<a class="pf-card" href="gallery.html?id=${g.id}">
+                    <div class="pf-card-img" style="background-image:url('${cover}')"></div>
+                    <div class="pf-card-body"><b>${g.name}</b><span>${count} photos${g.eventDate ? ' · ' + g.eventDate : ''}</span></div>
+                  </a>`;
+        }).join('');
+      } catch (e) {
+        document.getElementById('pf-studio').textContent = 'Rohit Studios';
+        document.getElementById('pf-tagline').textContent = 'Wedding & event photography';
+      }
+
+      document.getElementById('contact-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('contact-msg');
+        msg.textContent = '✅ Enquiry sent! The photographer will contact you on WhatsApp within 24 hours. (Demo — no real message was sent.)';
+        msg.hidden = false;
+        e.target.reset();
+      });
+    });
+  </script>
+</body>
+</html>

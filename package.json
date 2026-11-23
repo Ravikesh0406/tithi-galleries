@@ -1,0 +1,19 @@
+{
+  "name": "tithi",
+  "version": "1.0.0",
+  "description": "> A product built like **Honcho.app**, but made for India — same idea (online galleries > with AI search for photographer events), no copying of the same brand name: a new name > (**Tithi**), India-first: prices in INR, Hindi option, +91 numbers where relevant.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.3.0",
+    "multer": "^2.5.0"
+  }
+}
