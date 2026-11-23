@@ -1,27 +1,50 @@
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 8123;
 const ROOT = __dirname;
-const UPLOADS_DIR = path.join(ROOT, 'uploads');
 const DATA_FILE = path.join(ROOT, 'data.json');
 
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+// On Vercel the filesystem is read-only (except /tmp) — fall back gracefully.
+let UPLOADS_DIR = path.join(ROOT, 'uploads');
+try {
+  if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  fs.accessSync(UPLOADS_DIR, fs.constants.W_OK);
+} catch (_e) {
+  UPLOADS_DIR = path.join(os.tmpdir(), 'tithi-uploads');
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+// In-memory store is the source of truth; file is a write-through cache (best effort).
+let mem = null;
 
 function loadData() {
+  if (mem) return mem;
   try {
-    if (fs.existsSync(DATA_FILE)) return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    if (fs.existsSync(DATA_FILE)) {
+      mem = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    }
   } catch (e) {
     console.error('Failed to read data.json', e);
   }
-  return { galleries: [], products: [], orders: [], portfolio: null };
+  if (!mem) mem = { galleries: [], products: [], orders: [], portfolio: null };
+  mem.galleries = mem.galleries || [];
+  mem.products = mem.products || [];
+  mem.orders = mem.orders || [];
+  return mem;
 }
 function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  mem = data;
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  } catch (_e) {
+    /* read-only filesystem (Vercel) — data stays in memory for this instance */
+  }
 }
 function uid() {
   return crypto.randomBytes(8).toString('hex');
@@ -285,6 +308,11 @@ app.use((err, _req, res, _next) => {
   res.status(400).json({ error: err.message || 'Request failed' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Tithi web app running at http://localhost:${PORT}`);
-});
+// Export for Vercel serverless (api/index.js); listen only when run directly.
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Tithi web app running at http://localhost:${PORT}`);
+  });
+}

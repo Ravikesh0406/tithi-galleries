@@ -73,6 +73,8 @@ online store sales (like Honcho), and upsells (storage upgrades).
 
 - Research: DONE
 - Phase 1 MVP: DONE
+- GitHub push: DONE → https://github.com/Ravikesh0406/tithi-galleries
+- Vercel production deploy: DONE → https://tithi-galleries.vercel.app (verified: pages + API + demo gallery all 200)
 - Phase 2 AI Search: TODO
 - Phase 3 Camera to Cloud (Web App MVP): DONE — phone camera capture/upload to cloud, manual URL/file upload, live gallery refresh. DSLR/WiFi tether app: TODO
 - Phase 4 WhatsApp Integration: TODO (basic share link done)
@@ -95,6 +97,14 @@ online store sales (like Honcho), and upsells (storage upgrades).
 - Landing: nav links to Store + Portfolio, hero CTA → example gallery, new "Live example" demo band with photo strip.
 - Mobile-friendly responsive UI for Android/iPhone browsers.
 - `COSTING.md`: infra pricing (Vercel + Cloudflare R2), per-plan unit economics, break-even math.
+
+## Deploy
+
+- **GitHub:** https://github.com/Ravikesh0406/tithi-galleries (push `main`)
+- **Vercel:** https://tithi-galleries.vercel.app — `vercel deploy --prod`
+- `vercel.json` routes static files from disk, `/api/*` + fallbacks to `api/index.js`, which exports the Express app directly (a plain `(req, res)` listener — do **not** use `serverless-http` here, it expects AWS events and hangs on Vercel).
+- `server.js` exports the app and only calls `listen()` when run directly (`npm run dev` locally).
+- Serverless filesystem is read-only: data.json is an in-memory-first store with best-effort file cache; uploads fall back to `os.tmpdir()`. **Persistence across lambda instances + real file uploads need Cloudflare R2 + a hosted DB before launch** (per COSTING.md).
 
 ## Repo layout
 
